@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- 문자 인코딩 및 반응형 디자인을 위한 메타 정보 -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MJU-Group1</title>
+
+    <!-- 페이지 스타일링을 위한 CSS 스타일 -->
+    <style>
+        /* 히어로 섹션 스타일 */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: white;
+        }
+
+        /* 파일 업로드 관련 스타일 */
+        .file-input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn {
+            border: 2px solid gray;
+            color: gray;
+            background-color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 히어로 섹션 -->
+    <div class="hero">
+        <!-- 파일 업로드 버튼과 입력 필드 -->
+        <div class="upload-btn-wrapper">
+            <button class="btn">Choose a PDF file</button>
+            <input type="file" name="myfile" class="file-input" id="fileInput" accept=".pdf" />
+        </div>
+        <!-- 파일 정보를 표시하는 부분 -->
+        <p id="fileInfo"></p>
+    </div>
+
+    <!-- 자바스크립트 코드 -->
+    <script>
+        // 파일 입력 필드와 파일 정보 표시 영역의 엘리먼트를 가져옴
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+
+        // 파일 입력 필드에 변화가 있을 때마다 호출되는 이벤트 리스너 추가
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            // 파일 정보를 표시하는 함수 호출
+            displayFileInfo(file);
+        });
+
+        // 파일 정보를 표시하는 함수
+        function displayFileInfo(file) {
+            if (file) {
+                // 파일 정보를 HTML에 추가
+                fileInfo.innerHTML = `<strong>File Name:</strong> ${file.name}<br>
+                                      <strong>File Size:</strong> ${formatBytes(file.size)}<br>
+                                      <strong>Last Modified:</strong> ${file.lastModifiedDate}`;
+            } else {
+                // 파일이 선택되지 않았을 경우 메시지 표시
+                fileInfo.innerHTML = 'No file selected';
+            }
+        }
+
+        // 파일 크기를 포맷하는 함수
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+    </script>
+</body>
+
+</html>
