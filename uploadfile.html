@@ -66,6 +66,9 @@
         </div>
         <!-- 파일 정보를 표시하는 부분 -->
         <p id="fileInfo"></p>
+        <div class="download-btn-wrapper" id="fileConverter" style="display: none;">
+            <button class="btn">Converte docx File</button>
+        </div>
     </div>
 
     <!-- 자바스크립트 코드 -->
@@ -73,14 +76,43 @@
         // 파일 입력 필드와 파일 정보 표시 영역의 엘리먼트를 가져옴
         const fileInput = document.getElementById('fileInput');
         const fileInfo = document.getElementById('fileInfo');
+        const fileConverter = document.getElementById('fileConverter');
+        const fileDownload = document.getElementById('fileDownload');
 
         // 파일 입력 필드에 변화가 있을 때마다 호출되는 이벤트 리스너 추가
         fileInput.addEventListener('change', function () {
             const file = this.files[0];
             // 파일 정보를 표시하는 함수 호출
             displayFileInfo(file);
+
+            if (file) {
+                fileConverter.style.display = 'block';
+            } else {
+                fileConverter.style.display = 'none';
+            }
         });
 
+        fileConverter.addEventListener('click', function () {
+            const file = fileInput.files[0];
+            const formData = new FormData(); // FormData 인스턴스 생성
+            formData.append('file', file); // file 프로퍼티에 파일 추가
+
+            fetch('http://localhost:5000/pdfminer/get_doc', {
+                method: 'POST',
+                body: formData
+            })
+                .then(response => response.blob())
+                .then(blob => {
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = file.name.replace('.pdf', '.docx'); // 원본 파일 이름에 '.docx' 확장자 붙이기
+                    a.click();
+                })
+                .catch(error => console.error('Error:', error));
+            
+            fileDownload.style.display = 'block';
+        });
         // 파일 정보를 표시하는 함수
         function displayFileInfo(file) {
             if (file) {
@@ -106,6 +138,7 @@
             return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
         }
     </script>
+
 </body>
 
 </html>
