@@ -94,25 +94,33 @@
 
         fileConverter.addEventListener('click', function () {
             const file = fileInput.files[0];
-            const formData = new FormData(); // FormData 인스턴스 생성
-            formData.append('file', file); // file 프로퍼티에 파일 추가
+            const formData = new FormData();
+            formData.append('file', file);
 
             fetch('http://localhost:5000/pdfminer/get_doc', {
                 method: 'POST',
                 body: formData
             })
-                .then(response => response.blob())
-                .then(blob => {
-                    const url = window.URL.createObjectURL(blob);
-                    const a = document.createElement('a');
-                    a.href = url;
-                    a.download = file.name.replace('.pdf', '.docx'); // 원본 파일 이름에 '.docx' 확장자 붙이기
-                    a.click();
-                })
-                .catch(error => console.error('Error:', error));
-            
-            fileDownload.style.display = 'block';
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const filename = file.name.replace('.pdf', '.docx');
+                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Error:', error));
+
+            //fileDownload.style.display = 'block';
         });
+
         // 파일 정보를 표시하는 함수
         function displayFileInfo(file) {
             if (file) {
