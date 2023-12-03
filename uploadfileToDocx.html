@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <!-- 문자 인코딩 및 반응형 디자인을 위한 메타 정보 -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>MJU-Group1</title>
+
+    <!-- 페이지 스타일링을 위한 CSS 스타일 -->
+    <style>
+        /* 히어로 섹션 스타일 */
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            background-color: white;
+        }
+
+        /* 파일 업로드 관련 스타일 */
+        .file-input {
+            opacity: 0;
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            cursor: pointer;
+        }
+
+        .upload-btn-wrapper {
+            position: relative;
+            overflow: hidden;
+            display: inline-block;
+        }
+
+        .btn {
+            border: 2px solid gray;
+            color: gray;
+            background-color: white;
+            padding: 8px 20px;
+            border-radius: 8px;
+            font-size: 20px;
+            font-weight: bold;
+        }
+
+        .upload-btn-wrapper input[type=file] {
+            font-size: 100px;
+            position: absolute;
+            left: 0;
+            top: 0;
+            opacity: 0;
+        }
+
+        .download-message {
+            display: none;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <!-- 히어로 섹션 -->
+    <div class="hero">
+        <!-- 파일 업로드 버튼과 입력 필드 -->
+        <div class="upload-btn-wrapper">
+            <button class="btn">Choose a PDF file</button>
+            <input type="file" name="myfile" class="file-input" id="fileInput" accept=".pdf" />
+        </div>
+        <!-- 파일 정보를 표시하는 부분 -->
+        <p id="fileInfo"></p>
+        <div class="download-btn-wrapper" id="fileConverter" style="display: none;">
+            <button class="btn" id="downloadButton">Convert to docx File</button>
+            <p class="download-message" id="downloadMessage">Downloading...</p>
+        </div>
+    </div>
+
+    <!-- 자바스크립트 코드 -->
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const fileInfo = document.getElementById('fileInfo');
+        const fileConverter = document.getElementById('fileConverter');
+        const downloadButton = document.getElementById('downloadButton');
+        const downloadMessage = document.getElementById('downloadMessage');
+
+        fileInput.addEventListener('change', function () {
+            const file = this.files[0];
+            displayFileInfo(file);
+
+            if (file) {
+                fileConverter.style.display = 'block';
+            } else {
+                fileConverter.style.display = 'none';
+            }
+        });
+
+        downloadButton.addEventListener('click', function () {
+            const file = fileInput.files[0];
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            downloadMessage.style.display = 'block';
+
+            fetch('http://localhost:5000/pdfminer/get_doc', {
+                method: 'POST',
+                body: formData
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.blob();
+            })
+            .then(blob => {
+                const filename = file.name.replace('.pdf', '.docx');
+                const a = document.createElement('a');
+                const url = URL.createObjectURL(blob);
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
+
+                downloadMessage.style.display = 'none'; // 다운로드 완료 시 메시지 숨김
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                downloadMessage.style.display = 'none'; // 에러 발생 시 메시지 숨김
+            });
+        });
+
+        function displayFileInfo(file) {
+            if (file) {
+                fileInfo.innerHTML = `<strong>File Name:</strong> ${file.name}<br>
+                                      <strong>File Size:</strong> ${formatBytes(file.size)}<br>
+                                      <strong>Last Modified:</strong> ${file.lastModifiedDate}`;
+            } else {
+                fileInfo.innerHTML = 'No file selected';
+            }
+        }
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+    </script>
+
+</body>
+
+</html>
