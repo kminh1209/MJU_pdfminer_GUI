@@ -73,7 +73,7 @@
         <!-- 파일 정보를 표시하는 부분 -->
         <p id="fileInfo"></p>
         <div class="download-btn-wrapper" id="fileConverter" style="display: none;">
-            <button class="btn" id="downloadButton">Convert to Txt File</button>
+            <button class="btn" id="downloadButton">Convert to html File</button>
             <p class="download-message" id="downloadMessage">Downloading...</p>
         </div>
     </div>
@@ -104,7 +104,7 @@
             
             downloadMessage.style.display = 'block';
 
-            fetch('http://localhost:5000/pdfminer/get_txt', { //shinnk.iptime.org:5000:/pdfminer/get_txt 으로 URL 수정하면 됨.
+            fetch('http://localhost:5000/pdfminer/get_html', {
                 method: 'POST',
                 body: formData
             })
@@ -115,7 +115,7 @@
                 return response.blob();
             })
             .then(blob => {
-                const filename = file.name.replace('.pdf', '.txt'); // .txt로 수정하면 됨.
+                const filename = file.name.replace('.pdf', '.html');
                 const a = document.createElement('a');
                 const url = URL.createObjectURL(blob);
                 a.href = url;
